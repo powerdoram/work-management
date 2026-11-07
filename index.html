@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WORK MANAGEMENT</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f4f6fa;
+      color: #263247;
+    }
+    header {
+      background: #172b4d;
+      color: white;
+      padding: 24px 5%;
+    }
+    header h1 { margin: 0; font-size: 25px; }
+    header p { margin: 6px 0 0; color: #bdc9db; }
+    main { max-width: 1250px; margin: 30px auto; padding: 0 24px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .card, .member {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px #172b4d0c;
+    }
+    .card span { color: #718096; font-size: 14px; }
+    .card strong { display: block; font-size: 30px; margin-top: 8px; }
+    h2 { font-size: 19px; margin: 30px 0 16px; }
+    .member { margin-bottom: 14px; }
+    .member h3 { margin: 0 0 14px; }
+    .task {
+      display: grid;
+      grid-template-columns: 2fr 1fr 120px;
+      gap: 12px;
+      padding: 13px 0;
+      border-top: 1px solid #edf0f5;
+      align-items: center;
+    }
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      background: #e9efff;
+      color: #315bc4;
+    }
+    .done { background: #e2f6eb; color: #21834d; }
+    .notyet { background: #fff1d9; color: #a36a10; }
+    .add {
+      background: #315bc4;
+      color: white;
+      border: 0;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .empty { color: #8994a5; }
+    @media(max-width:700px) {
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .task { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>WORK MANAGEMENT</h1>
+    <p>チーム業務管理ダッシュボード</p>
+  </header>
+  <main>
+    <div class="stats">
+      <div class="card"><span>総タスク数</span><strong id="total">4</strong></div>
+      <div class="card"><span>進行中</span><strong id="progress">2</strong></div>
+      <div class="card"><span>未着手</span><strong id="pending">1</strong></div>
+      <div class="card"><span>完了</span><strong id="completed">1</strong></div>
+    </div>
+
+    <h2>メンバー別タスク一覧</h2>
+    <div id="members"></div>
+    <button class="add" onclick="addTask()">＋ タスクを追加</button>
+  </main>
+
+  <script>
+    const people = ["メンバーA","メンバーB","メンバーC","メンバーD"];
+
+    let tasks = [
+      {person:"メンバーA", title:"資料作成", date:"2026-11-10", status:"進行中"},
+      {person:"メンバーB", title:"データ集計", date:"2026-11-11", status:"完了"},
+      {person:"メンバーC", title:"内容確認", date:"2026-11-12", status:"未着手"},
+      {person:"メンバーD", title:"報告書作成", date:"2026-11-13", status:"進行中"}
+    ];
+
+    function render() {
+      document.getElementById("total").textContent = tasks.length;
+      document.getElementById("progress").textContent =
+        tasks.filter(t=>t.status==="進行中").length;
+      document.getElementById("pending").textContent =
+        tasks.filter(t=>t.status==="未着手").length;
+      document.getElementById("completed").textContent =
+        tasks.filter(t=>t.status==="完了").length;
+
+      document.getElementById("members").innerHTML = people.map(person => {
+        const list = tasks.filter(t=>t.person===person);
+        return `<section class="member">
+          <h3>${person}（${list.length}件）</h3>
+          ${list.length ? list.map(t=>`
+            <div class="task">
+              <strong>${t.title}</strong>
+              <span>${t.date}</span>
+              <span class="status ${t.status==="完了"?"done":t.status==="未着手"?"notyet":""}">${t.status}</span>
+            </div>`).join("") : '<p class="empty">タスクはありません</p>'}
+        </section>`;
+      }).join("");
+    }
+
+    function addTask() {
+      const person = prompt("担当者を入力してください（メンバーA～D）");
+      if (!people.includes(person)) {
+        alert("メンバーA～Dから選択してください");
+        return;
+      }
+      const title = prompt("仕事内容を入力してください");
+      if (!title || !title.trim()) return;
+      const date = prompt("期限を入力してください（例：2026-11-20）");
+      if (!date) return;
+      tasks.push({person,title:title.trim(),date,status:"未着手"});
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
