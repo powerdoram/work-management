@@ -1,26 +1,35 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>タスク管理</title>
+
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
       background: #f4f6fa;
       color: #263247;
     }
+
     header {
       background: #172b4d;
       color: white;
       padding: 24px 5%;
     }
+
     header h1 { margin: 0; font-size: 25px; }
     header p { margin: 6px 0 0; color: #bdc9db; }
-    main { max-width: 1250px; margin: 30px auto; padding: 0 24px; }
+
+    main {
+      max-width: 1250px;
+      margin: 30px auto;
+      padding: 0 24px;
+    }
+
     .login {
       max-width: 420px;
       margin: 70px auto;
@@ -30,6 +39,16 @@
       text-align: center;
       box-shadow: 0 2px 8px #172b4d0c;
     }
+
+    .login input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
     button {
       background: #315bc4;
       color: white;
@@ -39,25 +58,55 @@
       cursor: pointer;
       font-size: 14px;
     }
-    button:disabled { opacity: .5; cursor: wait; }
-    #logout { background: #64748b; margin-top: 10px; }
-    #userInfo { color: #bdc9db; font-size: 13px; margin-top: 8px; }
+
+    button:disabled {
+      opacity: .5;
+      cursor: wait;
+    }
+
+    #logout {
+      background: #64748b;
+      margin-top: 10px;
+    }
+
+    #userInfo {
+      color: #bdc9db;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
     }
+
     .card, .member {
       background: white;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 8px #172b4d0c;
     }
-    .card span { color: #718096; font-size: 14px; }
-    .card strong { display: block; font-size: 30px; margin-top: 8px; }
-    h2 { font-size: 19px; margin: 30px 0 16px; }
+
+    .card span {
+      color: #718096;
+      font-size: 14px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 30px;
+      margin-top: 8px;
+    }
+
+    h2 {
+      font-size: 19px;
+      margin: 30px 0 16px;
+    }
+
     .member { margin-bottom: 14px; }
     .member h3 { margin: 0 0 14px; }
+
     .task {
       display: grid;
       grid-template-columns: 2fr 1fr 120px;
@@ -66,6 +115,7 @@
       border-top: 1px solid #edf0f5;
       align-items: center;
     }
+
     .status {
       display: inline-block;
       padding: 5px 10px;
@@ -74,19 +124,35 @@
       background: #e9efff;
       color: #315bc4;
     }
-    .done { background: #e2f6eb; color: #21834d; }
-    .notyet { background: #fff1d9; color: #a36a10; }
+
+    .done {
+      background: #e2f6eb;
+      color: #21834d;
+    }
+
+    .notyet {
+      background: #fff1d9;
+      color: #a36a10;
+    }
+
     .add { margin-top: 10px; }
     .empty { color: #8994a5; }
     .hidden { display: none !important; }
-    #message { color: #b42318; font-size: 14px; }
+
+    #message {
+      color: #b42318;
+      font-size: 14px;
+    }
+
     @media(max-width:700px) {
       .stats { grid-template-columns: repeat(2,1fr); }
       .task { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
+
 <body>
+
   <header>
     <h1>WORK MANAGEMENT</h1>
     <p>チーム業務管理ダッシュボード</p>
@@ -94,67 +160,84 @@
     <button id="logout" class="hidden">ログアウト</button>
   </header>
 
-  
-<section id="loginArea" class="login">
-  <h2>ログイン</h2>
-  <p>班専用タスク管理システム</p>
+  <!-- ログイン画面 -->
+  <section id="loginArea" class="login">
+    <h2>ログイン</h2>
+    <p>班専用タスク管理システム</p>
 
-  <input
-    type="text"
-    id="loginId"
-    placeholder="ログインID"
-    autocomplete="username"
-    style="width:100%; padding:12px; margin:8px 0; border:1px solid #ccc; border-radius:8px;"
-  >
+    <input
+      type="text"
+      id="loginId"
+      placeholder="ログインID"
+      autocomplete="username"
+    >
 
-  <input
-    type="password"
-    id="loginPassword"
-    placeholder="パスワード"
-    autocomplete="current-password"
-    style="width:100%; padding:12px; margin:8px 0 16px; border:1px solid #ccc; border-radius:8px;"
-  >
+    <input
+      type="password"
+      id="loginPassword"
+      placeholder="パスワード"
+      autocomplete="current-password"
+    >
 
-  <button id="login" style="width:100%;">ログイン</button>
-  <p id="message"></p>
-</section>
+    <button id="login" style="width:100%;">ログイン</button>
+    <p id="message"></p>
+  </section>
 
-
+  <!-- タスク管理画面 -->
   <main id="dashboard" class="hidden">
+
     <div class="stats">
-      <div class="card"><span>総タスク数</span><strong id="total">4</strong></div>
-      <div class="card"><span>進行中</span><strong id="progress">2</strong></div>
-      <div class="card"><span>未着手</span><strong id="pending">1</strong></div>
-      <div class="card"><span>完了</span><strong id="completed">1</strong></div>
+      <div class="card">
+        <span>総タスク数</span>
+        <strong id="total">0</strong>
+      </div>
+
+      <div class="card">
+        <span>進行中</span>
+        <strong id="progress">0</strong>
+      </div>
+
+      <div class="card">
+        <span>未着手</span>
+        <strong id="pending">0</strong>
+      </div>
+
+      <div class="card">
+        <span>完了</span>
+        <strong id="completed">0</strong>
+      </div>
     </div>
 
     <h2>メンバー別タスク一覧</h2>
+
     <div id="members"></div>
+
     <button class="add" id="addTask">＋ タスクを追加</button>
+
   </main>
 
   <script type="module">
+
+    // Firebaseの機能を読み込む
     import { initializeApp }
       from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
-  import {
-    getAuth,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-
-    
-  import {
-    getFirestore,
-    collection,
-    onSnapshot,
-    addDoc
-  } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      onSnapshot,
+      addDoc
+    } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
 
-
+    // Firebaseの設定
     const firebaseConfig = {
       apiKey: "AIzaSyDZheMaQWDMCfHLuVrqzNHo-d8Ee0C6DCk",
       authDomain: "work-management-3e8fa.firebaseapp.com",
@@ -165,150 +248,264 @@
       measurementId: "G-ZECN4E3K6B"
     };
 
+
+    // Firebaseの初期設定
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+
+    // HTMLの各要素を取得
     const loginArea = document.getElementById("loginArea");
     const dashboard = document.getElementById("dashboard");
     const loginButton = document.getElementById("login");
     const logoutButton = document.getElementById("logout");
     const message = document.getElementById("message");
+
+
+    // タスクの受信を管理する変数
     let unsubscribeTasks = null;
 
-    const people = ["メンバーA","メンバーB","メンバーC","メンバーD"];
 
+    // メンバー一覧
+    const people = [
+      "メンバーA",
+      "メンバーB",
+      "メンバーC",
+      "メンバーD"
+    ];
+
+
+    // タスク一覧
     let tasks = [];
 
 
-loginButton.addEventListener("click", async () => {
-  loginButton.disabled = true;
-  message.textContent = "";
+    // ログイン処理
+    loginButton.addEventListener("click", async () => {
 
-  const loginId = document.getElementById("loginId").value.trim();
-  const password = document.getElementById("loginPassword").value;
+      loginButton.disabled = true;
+      message.textContent = "";
 
-  if (!loginId || !password) {
-    message.textContent = "IDとパスワードを入力してください。";
-    loginButton.disabled = false;
-    return;
-  }
+      const loginId =
+        document.getElementById("loginId").value.trim();
 
-  try {
-    await signInWithEmailAndPassword(
-      auth,
-      `${loginId}@example.com`,
-      password
-    );
-  } catch (error) {
-    console.error(error);
-    message.textContent = "IDまたはパスワードが正しくありません。";
-  } finally {
-    loginButton.disabled = false;
-  }
-});
+      const password =
+        document.getElementById("loginPassword").value;
 
+      if (!loginId || !password) {
+        message.textContent =
+          "IDとパスワードを入力してください。";
 
-    logoutButton.addEventListener("click", async () => {
-      await signOut(auth);
-    });
-
-    
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loginArea.classList.add("hidden");
-    dashboard.classList.remove("hidden");
-    logoutButton.classList.remove("hidden");
-    document.getElementById("userInfo").textContent = "";
-
-    if (unsubscribeTasks) {
-      unsubscribeTasks();
-    }
-
-    unsubscribeTasks = onSnapshot(
-      collection(db, "tasks"),
-      (snapshot) => {
-        tasks = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        render();
-      },
-      (error) => {
-        console.error(error);
-        message.textContent = "タスクの読み込みに失敗しました。";
+        loginButton.disabled = false;
+        return;
       }
-    );
 
-  } else {
-    if (unsubscribeTasks) {
-      unsubscribeTasks();
-      unsubscribeTasks = null;
-    }
+      try {
 
-    tasks = [];
-    loginArea.classList.remove("hidden");
-    dashboard.classList.add("hidden");
-    logoutButton.classList.add("hidden");
-    document.getElementById("userInfo").textContent = "";
-  }
-});
+        await signInWithEmailAndPassword(
+          auth,
+          `${loginId}@example.com`,
+          password
+        );
 
+      } catch (error) {
 
-    function render() {
-      document.getElementById("total").textContent = tasks.length;
-      document.getElementById("progress").textContent =
-        tasks.filter(t=>t.status==="進行中").length;
-      document.getElementById("pending").textContent =
-        tasks.filter(t=>t.status==="未着手").length;
-      document.getElementById("completed").textContent =
-        tasks.filter(t=>t.status==="完了").length;
+        console.error(error);
 
-      document.getElementById("members").innerHTML = people.map(person => {
-        const list = tasks.filter(t=>t.person===person);
-        return `<section class="member">
-          <h3>${person}（${list.length}件）</h3>
-          ${list.length ? list.map(t=>`
-            <div class="task">
-              <strong>${t.title}</strong>
-              <span>${t.date}</span>
-              <span class="status ${t.status==="完了"?"done":t.status==="未着手"?"notyet":""}">${t.status}</span>
-            </div>`).join("") : '<p class="empty">タスクはありません</p>'}
-        </section>`;
-      }).join("");
-    }
+        message.textContent =
+          "IDまたはパスワードが正しくありません。";
 
-    function addTask() {
-      
-async function addTask() {
-  const person = prompt("担当者を入力してください（メンバーA～D）");
+      } finally {
 
-  if (!people.includes(person)) {
-    alert("メンバーA～Dから選択してください");
-    return;
-  }
+        loginButton.disabled = false;
 
-  const title = prompt("仕事内容を入力してください");
-  if (!title || !title.trim()) return;
+      }
 
-  const date = prompt("期限を入力してください（例：2026-11-20）");
-  if (!date) return;
-
-  try {
-    await addDoc(collection(db, "tasks"), {
-      person,
-      title: title.trim(),
-      date,
-      status: "未着手"
     });
-  } catch (error) {
-    console.error(error);
-    alert("タスクの保存に失敗しました。");
-  }
-}
 
 
-    document.getElementById("addTask").addEventListener("click", addTask);
+    // ログアウト処理
+    logoutButton.addEventListener("click", async () => {
+
+      try {
+        await signOut(auth);
+      } catch (error) {
+        console.error(error);
+        alert("ログアウトできませんでした。");
+      }
+
+    });
+
+
+    // ログイン状態の監視
+    onAuthStateChanged(auth, (user) => {
+
+      if (user) {
+
+        // ログイン成功
+        loginArea.classList.add("hidden");
+        dashboard.classList.remove("hidden");
+        logoutButton.classList.remove("hidden");
+
+        document.getElementById("userInfo").textContent = "";
+
+        // 古いタスク受信を停止
+        if (unsubscribeTasks) {
+          unsubscribeTasks();
+        }
+
+        // Firebaseからタスクをリアルタイム取得
+        unsubscribeTasks = onSnapshot(
+          collection(db, "tasks"),
+
+          (snapshot) => {
+
+            tasks = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+
+            render();
+
+          },
+
+          (error) => {
+
+            console.error(error);
+
+            message.textContent =
+              "タスクの読み込みに失敗しました。";
+
+          }
+
+        );
+
+      } else {
+
+        // ログアウト状態
+        if (unsubscribeTasks) {
+          unsubscribeTasks();
+          unsubscribeTasks = null;
+        }
+
+        tasks = [];
+
+        loginArea.classList.remove("hidden");
+        dashboard.classList.add("hidden");
+        logoutButton.classList.add("hidden");
+
+        document.getElementById("userInfo").textContent = "";
+
+      }
+
+    });
+
+
+    // タスク一覧を画面に表示する処理
+    function render() {
+
+      document.getElementById("total").textContent =
+        tasks.length;
+
+      document.getElementById("progress").textContent =
+        tasks.filter(t => t.status === "進行中").length;
+
+      document.getElementById("pending").textContent =
+        tasks.filter(t => t.status === "未着手").length;
+
+      document.getElementById("completed").textContent =
+        tasks.filter(t => t.status === "完了").length;
+
+
+      document.getElementById("members").innerHTML =
+        people.map(person => {
+
+          const list = tasks.filter(
+            t => t.person === person
+          );
+
+          return `
+            <section class="member">
+              <h3>${person}（${list.length}件）</h3>
+
+              ${
+                list.length
+                  ? list.map(t => `
+                    <div class="task">
+                      <strong>${t.title}</strong>
+                      <span>${t.date}</span>
+                      <span class="status ${
+                        t.status === "完了"
+                          ? "done"
+                          : t.status === "未着手"
+                            ? "notyet"
+                            : ""
+                      }">${t.status}</span>
+                    </div>
+                  `).join("")
+                  : '<p class="empty">タスクはありません</p>'
+              }
+
+            </section>
+          `;
+
+        }).join("");
+
+    }
+
+
+    // タスクを追加してFirebaseに保存する処理
+    async function addTask() {
+
+      const person = prompt(
+        "担当者を入力してください（メンバーA～D）"
+      );
+
+      if (!people.includes(person)) {
+        alert("メンバーA～Dから選択してください");
+        return;
+      }
+
+      const title = prompt("仕事内容を入力してください");
+
+      if (!title || !title.trim()) {
+        return;
+      }
+
+      const date = prompt(
+        "期限を入力してください（例：2026-11-20）"
+      );
+
+      if (!date) {
+        return;
+      }
+
+      try {
+
+        await addDoc(collection(db, "tasks"), {
+          person: person,
+          title: title.trim(),
+          date: date,
+          status: "未着手"
+        });
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert("タスクの保存に失敗しました。");
+
+      }
+
+    }
+
+
+    // タスク追加ボタン
+    document
+      .getElementById("addTask")
+      .addEventListener("click", addTask);
+
   </script>
+
 </body>
 </html>
