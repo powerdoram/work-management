@@ -94,12 +94,31 @@
     <button id="logout" class="hidden">ログアウト</button>
   </header>
 
-  <section id="loginArea" class="login">
-    <h2>ログイン</h2>
-    <p>Googleアカウントでログインしてください。</p>
-    <button id="login">Googleでログイン</button>
-    <p id="message"></p>
-  </section>
+  
+<section id="loginArea" class="login">
+  <h2>ログイン</h2>
+  <p>班専用タスク管理システム</p>
+
+  <input
+    type="text"
+    id="loginId"
+    placeholder="ログインID"
+    autocomplete="username"
+    style="width:100%; padding:12px; margin:8px 0; border:1px solid #ccc; border-radius:8px;"
+  >
+
+  <input
+    type="password"
+    id="loginPassword"
+    placeholder="パスワード"
+    autocomplete="current-password"
+    style="width:100%; padding:12px; margin:8px 0 16px; border:1px solid #ccc; border-radius:8px;"
+  >
+
+  <button id="login" style="width:100%;">ログイン</button>
+  <p id="message"></p>
+</section>
+
 
   <main id="dashboard" class="hidden">
     <div class="stats">
@@ -118,13 +137,14 @@
     import { initializeApp }
       from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
 
     const firebaseConfig = {
       apiKey: "AIzaSyDZheMaQWDMCfHLuVrqzNHo-d8Ee0C6DCk",
@@ -136,9 +156,8 @@
       measurementId: "G-ZECN4E3K6B"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
     const loginArea = document.getElementById("loginArea");
     const dashboard = document.getElementById("dashboard");
@@ -155,18 +174,34 @@
       {person:"メンバーD", title:"報告書作成", date:"2026-11-13", status:"進行中"}
     ];
 
-    loginButton.addEventListener("click", async () => {
-      loginButton.disabled = true;
-      message.textContent = "";
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error(error);
-        message.textContent = "ログインできませんでした。もう一度お試しください。";
-      } finally {
-        loginButton.disabled = false;
-      }
-    });
+
+loginButton.addEventListener("click", async () => {
+  loginButton.disabled = true;
+  message.textContent = "";
+
+  const loginId = document.getElementById("loginId").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!loginId || !password) {
+    message.textContent = "IDとパスワードを入力してください。";
+    loginButton.disabled = false;
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      `${loginId}@example.com`,
+      password
+    );
+  } catch (error) {
+    console.error(error);
+    message.textContent = "IDまたはパスワードが正しくありません。";
+  } finally {
+    loginButton.disabled = false;
+  }
+});
+
 
     logoutButton.addEventListener("click", async () => {
       await signOut(auth);
