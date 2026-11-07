@@ -212,8 +212,7 @@ loginButton.addEventListener("click", async () => {
         loginArea.classList.add("hidden");
         dashboard.classList.remove("hidden");
         logoutButton.classList.remove("hidden");
-        document.getElementById("userInfo").textContent =
-          user.displayName || user.email || "ログイン中";
+document.getElementById("userInfo").textContent = "";
         render();
       } else {
         loginArea.classList.remove("hidden");
