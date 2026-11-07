@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WORK MANAGEMENT</title>
+  <title>タスク管理</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -20,6 +21,27 @@
     header h1 { margin: 0; font-size: 25px; }
     header p { margin: 6px 0 0; color: #bdc9db; }
     main { max-width: 1250px; margin: 30px auto; padding: 0 24px; }
+    .login {
+      max-width: 420px;
+      margin: 70px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 8px #172b4d0c;
+    }
+    button {
+      background: #315bc4;
+      color: white;
+      border: 0;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:disabled { opacity: .5; cursor: wait; }
+    #logout { background: #64748b; margin-top: 10px; }
+    #userInfo { color: #bdc9db; font-size: 13px; margin-top: 8px; }
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -54,16 +76,10 @@
     }
     .done { background: #e2f6eb; color: #21834d; }
     .notyet { background: #fff1d9; color: #a36a10; }
-    .add {
-      background: #315bc4;
-      color: white;
-      border: 0;
-      padding: 12px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+    .add { margin-top: 10px; }
     .empty { color: #8994a5; }
+    .hidden { display: none !important; }
+    #message { color: #b42318; font-size: 14px; }
     @media(max-width:700px) {
       .stats { grid-template-columns: repeat(2,1fr); }
       .task { grid-template-columns: 1fr 1fr; }
@@ -74,8 +90,18 @@
   <header>
     <h1>WORK MANAGEMENT</h1>
     <p>チーム業務管理ダッシュボード</p>
+    <div id="userInfo"></div>
+    <button id="logout" class="hidden">ログアウト</button>
   </header>
-  <main>
+
+  <section id="loginArea" class="login">
+    <h2>ログイン</h2>
+    <p>Googleアカウントでログインしてください。</p>
+    <button id="login">Googleでログイン</button>
+    <p id="message"></p>
+  </section>
+
+  <main id="dashboard" class="hidden">
     <div class="stats">
       <div class="card"><span>総タスク数</span><strong id="total">4</strong></div>
       <div class="card"><span>進行中</span><strong id="progress">2</strong></div>
@@ -85,10 +111,41 @@
 
     <h2>メンバー別タスク一覧</h2>
     <div id="members"></div>
-    <button class="add" onclick="addTask()">＋ タスクを追加</button>
+    <button class="add" id="addTask">＋ タスクを追加</button>
   </main>
 
-  <script>
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZheMaQWDMCfHLuVrqzNHo-d8Ee0C6DCk",
+      authDomain: "work-management-3e8fa.firebaseapp.com",
+      projectId: "work-management-3e8fa",
+      storageBucket: "work-management-3e8fa.firebasestorage.app",
+      messagingSenderId: "814816496340",
+      appId: "1:814816496340:web:005276074becc57f47c941",
+      measurementId: "G-ZECN4E3K6B"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginArea = document.getElementById("loginArea");
+    const dashboard = document.getElementById("dashboard");
+    const loginButton = document.getElementById("login");
+    const logoutButton = document.getElementById("logout");
+    const message = document.getElementById("message");
+
     const people = ["メンバーA","メンバーB","メンバーC","メンバーD"];
 
     let tasks = [
@@ -97,6 +154,39 @@
       {person:"メンバーC", title:"内容確認", date:"2026-11-12", status:"未着手"},
       {person:"メンバーD", title:"報告書作成", date:"2026-11-13", status:"進行中"}
     ];
+
+    loginButton.addEventListener("click", async () => {
+      loginButton.disabled = true;
+      message.textContent = "";
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error(error);
+        message.textContent = "ログインできませんでした。もう一度お試しください。";
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
+
+    logoutButton.addEventListener("click", async () => {
+      await signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginArea.classList.add("hidden");
+        dashboard.classList.remove("hidden");
+        logoutButton.classList.remove("hidden");
+        document.getElementById("userInfo").textContent =
+          user.displayName || user.email || "ログイン中";
+        render();
+      } else {
+        loginArea.classList.remove("hidden");
+        dashboard.classList.add("hidden");
+        logoutButton.classList.add("hidden");
+        document.getElementById("userInfo").textContent = "";
+      }
+    });
 
     function render() {
       document.getElementById("total").textContent = tasks.length;
@@ -135,7 +225,7 @@
       render();
     }
 
-    render();
+    document.getElementById("addTask").addEventListener("click", addTask);
   </script>
 </body>
 </html>
